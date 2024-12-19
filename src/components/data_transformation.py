@@ -44,11 +44,12 @@ class DataTransformation:
             cat_pipeline = Pipeline(
                 steps=[
                     ("imputer",SimpleImputer(strategy="most_frequent")),
-                    ("ohe_encoder",OneHotEncoder()),
+                    ("ohe_encoder",OneHotEncoder(handle_unknown='use_encoded_value', unknown_value=-1)),
                     ("scaler",StandardScaler(with_mean=False))
                 ])
             logging.info(f"Numerical Columns: {numerical_columns}")
             logging.info(f"Categorical Columns: {categorical_columns}")
+
 
             preprocessor = ColumnTransformer(
                 [
@@ -69,7 +70,14 @@ class DataTransformation:
             train_df = pd.read_csv(train_path)
             test_df = pd.read_csv(test_path)
 
+
             logging.info("Read the Train and Test data")
+            logging.info("Train and Test data loaded successfully.")
+            logging.info(f"Train data shape: {train_df.shape}, Test data shape: {test_df.shape}")
+
+            for col in ['gender', 'race_ethnicity', 'parental_level_of_education', 'lunch', 'test_preparation_course']:
+                print(f"{col} - Train unique values: {train_df[col].unique()}")
+                print(f"{col} - Test unique values: {test_df[col].unique()}")
 
             logging.info("Obtaining preprocessing object")
             preprocessing_obj = self.get_data_transformer_object()
@@ -82,6 +90,10 @@ class DataTransformation:
 
             input_feature_test_df = test_df.drop(columns=[target_column_name],axis=1)
             target_feature_test_df = test_df[target_column_name]
+
+            logging.info(f"Train input features preview: \n{input_feature_train_df.head()}")
+            logging.info(f"Test input features preview: \n{input_feature_test_df.head()}")
+
 
             logging.info("Applying preprocessing object on Training and Testing Dataframes.")
             input_feature_train_arr = preprocessing_obj.fit_transform(input_feature_train_df)
